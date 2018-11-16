@@ -2,7 +2,7 @@
   "name": "checkin_kphbot",
   "alias": "checkin.200kph.io",
   "env": {
-    "TG_TOKEN": "@my-tg-checkin-bot"
+    "TG_TOKEN": "@my-tg-token-checkin-bot"
   },
   "scale": {
     "sfo1": {
