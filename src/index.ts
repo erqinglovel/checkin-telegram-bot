@@ -19,6 +19,9 @@ interface INote {
 const notes: INote[] = []
 
 bot.onText(/\/Нагадай (.+) в (.+)/, (msg: TelegramBot.Message, match: RegExpExecArray | null) => {
+
+  console.warn(msg.text)
+
   if (!!msg && !!match) {
 
     const userId = msg.from.id
