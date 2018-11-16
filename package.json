@@ -4,6 +4,7 @@
   "description": "Checkin telegram bot by @200kph",
   "main": "index.js",
   "scripts": {
+    "postinstall": "npm run compile",
     "start": "node ./dist/index.js",
     "start:watch": "nodemon ./dist/index.js",
     "run:dev": "npm run compile:watch | npm run start:watch ",
