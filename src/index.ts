@@ -11,14 +11,14 @@ console.warn(`
 const bot = new TelegramBot(token, { polling: true})
 
 interface INote {
-  uid: string
+  uid: number
   text: string
   time: string
 }
 
 const notes: INote[] = []
 
-bot.onText(/\/Нагадай (.+) в (.+)/, (msg, match) => {
+bot.onText(/\/Нагадай (.+) в (.+)/, (msg: TelegramBot.Message, match: RegExpExecArray | null) => {
   if (!!msg && !!match) {
 
     const userId = msg.from.id
