@@ -10,6 +10,7 @@ console.warn(`
 
 const bot = new TelegramBot(token, { polling: true})
 
+
 interface INote {
   uid: number
   text: string
@@ -44,3 +45,10 @@ setInterval( () => {
     }
   }
 }, 1000)
+
+import http from 'http'
+http.createServer((req, res) => {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.write('Hello World!');
+  res.end();
+}).listen(8080);
