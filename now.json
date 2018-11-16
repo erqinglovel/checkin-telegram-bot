@@ -15,5 +15,5 @@
     }
   },
   "type": "npm",
-  "public": "true"
+  "public": true
 }
