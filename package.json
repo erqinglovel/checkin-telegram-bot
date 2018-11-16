@@ -1,0 +1,39 @@
+{
+  "name": "checkin-telegram-bot",
+  "version": "0.1.0",
+  "description": "Checkin telegram bot by @200kph",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "start:watch": "nodemon dist/index.js",
+    "run:dev": "npm run compile:watch | npm run start:watch ",
+    "compile": "tsc",
+    "compile:watch": "npm run compile -- -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexanderSergan/checkin-telegram-bot.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "200kph",
+    "checkin",
+    "check-in"
+  ],
+  "author": "200kph",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexanderSergan/checkin-telegram-bot/issues"
+  },
+  "homepage": "https://github.com/AlexanderSergan/checkin-telegram-bot#readme",
+  "dependencies": {
+    "@types/node-telegram-bot-api": "^0.30.3",
+    "node-telegram-bot-api": "^0.30.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.6",
+    "tslint": "^5.11.0"
+  }
+}
