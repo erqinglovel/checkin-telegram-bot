@@ -10,7 +10,6 @@ console.warn(`
 
 const bot = new TelegramBot(token, { polling: true})
 
-
 interface INote {
   uid: number
   text: string
@@ -48,7 +47,10 @@ setInterval( () => {
 
 import http from 'http'
 http.createServer((req, res) => {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.write('Hello World!');
-  res.end();
-}).listen(8080);
+  res.writeHead(200, {'Content-Type': 'text/plain'})
+  res.write('Hello World!')
+  res.end()
+}).listen(443)
+
+console.warn('listening port 443')
+
