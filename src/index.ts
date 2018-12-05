@@ -1,6 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api'
 
-const token = process.env.TG_TOKEN || 'no_token'
+const token = process.env.TG_TOKEN || '716071100:AAHUl79kfpuGGniwfKmi_dJ0qr0mW9TML-c'
 
 console.warn(`
   hola world i am linted on precommit hook xD
@@ -11,12 +11,20 @@ console.warn(`
 const bot = new TelegramBot(token, { polling: true})
 
 interface INote {
+  username: string
   uid: number
   text: string
   time: string
 }
 
 const notes: INote[] = []
+
+bot.onText(/\/echo (.+)/, (msg: TelegramBot.Message, match: RegExpExecArray) => {
+  if (msg && match) {
+    console.log(`Match: ${match} ::::: Msg:`, msg)
+    bot.sendMessage(msg.chat.id, `User @${msg.from.username} said ${match[1]}`)
+  }
+})
 
 bot.onText(/\/Нагадай (.+) в (.+)/, (msg: TelegramBot.Message, match: RegExpExecArray | null) => {
 
@@ -53,6 +61,6 @@ http.createServer((req, res) => {
   res.writeHead(200, {'Content-Type': 'text/plain'})
   res.write('Hello World!')
   res.end()
-}).listen(443)
+}).listen(4200)
 
-console.warn('listening port 443')
+console.warn('listening port 4200')
