@@ -1,7 +1,7 @@
 import http from 'http'
-import moment, { Duration } from 'moment'
+import moment from 'moment'
 import TelegramBot from 'node-telegram-bot-api'
-import { Dates, db, User } from '../db/'
+import { Dates, User } from '../db/'
 // import { INote } from './interfaces/'
 import { IUser } from './interfaces/user.interface'
 
@@ -13,6 +13,7 @@ const token = process.env.TG_TOKEN || '716071100:AAHUl79kfpuGGniwfKmi_dJ0qr0mW9T
 // `,
 // )
 const m = moment
+
 const bot = new TelegramBot(token, { polling: true})
 const workers = {}
 const workerState = ['checkin', 'checkout', 'paused']
@@ -49,7 +50,7 @@ bot.onText(/\/test (.+)/, (msg: TelegramBot.Message, match: RegExpExecArray) => 
 bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
   if (msg) {
     bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).format('HH:mm')}`)
-    workers[`${msg.from.id}`].startAt = Date.now()
+    workers[`${msg.from.id}`] = { startAt: Date.now() }
     workers[`${msg.from.id}`].status = workerState[0]
     console.warn(workers)
   }
@@ -58,22 +59,25 @@ bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
 bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
   if (msg) {
     bot.sendMessage(msg.from.id, `@${msg.from.username} checkout at ${m(new Date()).format('HH:mm')}`)
+    const range = m(workers[`${msg.from.id}`].startAt)
+    const timeSpent = range.diff( m(new Date()),  'hours')
+    User.findOneAndUpdate({ telegram_id: `${msg.from.id}` },
+  { day_total: Math.abs(timeSpent) }).exec()
   }
-  User.findOneAndUpdate({ telegram_id: `${msg.from.id}` },
-  { day_total: m.duration(workers[`${msg.from.id}`].startAt -  Date.now()).asHours() }).exec()
-  // console.warn(m.duration(duration -  Date.now()).humanize())
-
 })
 
 bot.onText(/\/today/, (msg: TelegramBot.Message) => {
   if (msg) {
     /* get from  db duration in hours-total for today*/
-   User.findOne({ telegram_id: msg.from.id }, (usr, err) => {
+   User.findOne({ telegram_id: msg.from.id }, (err, usr: IUser) => {
      if (err) {
        console.error(new Error(err.toString()))
      } else {
+       console.warn(usr)
+       const user = {...usr}
+
        bot.sendMessage(msg.from.id,
-        `@${msg.from.username} time spent .::TODAY::. ${m.duration(usr.day_total, 'hours').humanize()}`)
+        `@${msg.from.username} time spent .::TODAY::. ${m().milliseconds(user.day_total)}`)
      }
    })
   }
