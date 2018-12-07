@@ -15,7 +15,7 @@ const token = process.env.TG_TOKEN || '716071100:AAHUl79kfpuGGniwfKmi_dJ0qr0mW9T
 const m = moment
 const bot = new TelegramBot(token, { polling: true})
 const workers = {}
-let duration: any
+const workerState = ['checkin', 'checkout', 'paused']
 // const notes: INote[] = []
 
 // function getFromDb() {
@@ -49,9 +49,9 @@ bot.onText(/\/test (.+)/, (msg: TelegramBot.Message, match: RegExpExecArray) => 
 bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
   if (msg) {
     bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).format('HH:mm')}`)
-    duration = Date.now()
-    console.log(duration)
-
+    workers[`${msg.from.id}`].startAt = Date.now()
+    workers[`${msg.from.id}`].status = workerState[0]
+    console.warn(workers)
   }
 })
 
@@ -60,16 +60,23 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
     bot.sendMessage(msg.from.id, `@${msg.from.username} checkout at ${m(new Date()).format('HH:mm')}`)
   }
   User.findOneAndUpdate({ telegram_id: `${msg.from.id}` },
-  { day_total: m.duration(duration -  Date.now()).asHours() }).exec()
-  // console.log(m.duration(duration -  Date.now()).humanize())
+  { day_total: m.duration(workers[`${msg.from.id}`].startAt -  Date.now()).asHours() }).exec()
+  // console.warn(m.duration(duration -  Date.now()).humanize())
 
 })
 
 bot.onText(/\/today/, (msg: TelegramBot.Message) => {
   if (msg) {
-    bot.sendMessage(msg.from.id, `@${msg.from.username} time spent .::TODAY::. ${m(new Date()).format('HH:mm')}`)
+    /* get from  db duration in hours-total for today*/
+   User.findOne({ telegram_id: msg.from.id }, (usr, err) => {
+     if (err) {
+       console.error(new Error(err.toString()))
+     } else {
+       bot.sendMessage(msg.from.id,
+        `@${msg.from.username} time spent .::TODAY::. ${m.duration(usr.day_total, 'hours').humanize()}`)
+     }
+   })
   }
-   /* get from  db duration */
 })
 
 bot.onText(/\/week/, (msg: TelegramBot.Message) => {
