@@ -75,9 +75,8 @@ bot.onText(/\/today/, (msg: TelegramBot.Message) => {
      } else {
        console.warn(usr)
        const user = {...usr}
-
        bot.sendMessage(msg.from.id,
-        `@${msg.from.username} time spent .::TODAY::. ${m().milliseconds(user.day_total)}`)
+        `@${msg.from.username} time spent .::TODAY::. ${user.day_total}`)
      }
    })
   }
