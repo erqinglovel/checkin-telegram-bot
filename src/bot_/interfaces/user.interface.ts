@@ -5,4 +5,5 @@ export interface IUser {
     reg_date: Moment
     telegram_id: number
     username: string
+    dates: object[],
 }

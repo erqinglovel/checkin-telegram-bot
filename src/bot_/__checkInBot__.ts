@@ -19,6 +19,7 @@ const workerState = ['checkin', 'checkout', 'paused']
 bot.onText(/\/start/, (msg: TelegramBot.Message) => {
   if (msg) {
     const user: IUser = {
+      dates: [],
       day_total: 0,
       reg_date: m().utcOffset(120),
       telegram_id: msg.from.id,
@@ -55,7 +56,14 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
     const range = m(workers[`${msg.from.id}`].startAt)
     const timeSpent = range.diff( m(new Date()),  'hours')
     User.findOneAndUpdate({ telegram_id: `${msg.from.id}` },
-  { day_total: Math.abs(timeSpent) }).exec()
+  { day_total: Math.abs(timeSpent) }).exec(() => {
+    User.aggregate([{
+      dates: [
+        { $month: { month_num: new Date() },
+        $week: { week_num: new Date() },
+      }],
+  }])
+  })
   }
 })
 
@@ -66,7 +74,6 @@ bot.onText(/\/today/, (msg: TelegramBot.Message) => {
      if (err) {
        console.error(new Error(err.toString()))
      } else {
-       console.warn(usr)
        const user = {...usr}
        bot.sendMessage(msg.from.id,
         `@${msg.from.username} time spent .::TODAY::. ${user.day_total}`)
