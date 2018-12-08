@@ -7,20 +7,12 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch via NPM",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
-                "debug"
-            ],
-            "port": 9229,
-            "program": "${workspaceFolder}/dist/index.js",
-            "restart": true,
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
-        },
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/src/index.ts",
+            "outFiles": ["${workspaceFolder}/dist/index.js"],
+            "preLaunchTask": "compile",
+            "sourceMaps": true,
+            "port": 9229,    
+        }
     ]
 }
