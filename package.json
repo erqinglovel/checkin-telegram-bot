@@ -36,7 +36,8 @@
     "@types/node-telegram-bot-api": "^0.30.3",
     "moment": "^2.22.2",
     "mongoose": "^5.3.14",
-    "node-telegram-bot-api": "^0.30.0"
+    "node-telegram-bot-api": "^0.30.0",
+    "rxjs": "^6.3.3"
   },
   "devDependencies": {
     "husky": "^1.1.4",

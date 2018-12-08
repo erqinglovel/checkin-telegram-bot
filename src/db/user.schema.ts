@@ -3,7 +3,12 @@ import mongoose from 'mongoose'
 export const userSchema = new mongoose.Schema({
     day_total: Number,
     reg_date: String,
-    telegram_id: Number,
+    telegram_id: {
+        index: {
+            unique: true,
+        },
+        type: Number,
+    },
     username: String,
 })
 

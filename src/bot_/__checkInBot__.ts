@@ -1,19 +1,12 @@
 import http from 'http'
 import moment from 'moment'
 import TelegramBot from 'node-telegram-bot-api'
-import { Dates, User } from '../db/'
+import { User } from '../db/'
 // import { INote } from './interfaces/'
 import { IUser } from './interfaces/user.interface'
 
 const token = process.env.TG_TOKEN || '716071100:AAHUl79kfpuGGniwfKmi_dJ0qr0mW9TML-c'
-
-// console.warn(`
-//   hola world i am linted on precommit hook xD
-//   telegram token: ${token}
-// `,
-// )
 const m = moment
-
 const bot = new TelegramBot(token, { polling: true})
 const workers = {}
 const workerState = ['checkin', 'checkout', 'paused']
