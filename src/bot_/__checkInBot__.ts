@@ -47,6 +47,14 @@ bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
     workers[`${msg.from.id}`] = { startAt: Date.now() }
     workers[`${msg.from.id}`].status = workerState[0]
     console.warn(workers)
+    User.findOne({telegram_id: msg.from.id }, (err, res) => {
+      User.aggregate([{
+        dates: [
+          { $month: { month_num: new Date() },
+          $week: { week_num: new Date() },
+        }],
+    }])
+    })
   }
 })
 
@@ -56,14 +64,7 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
     const range = m(workers[`${msg.from.id}`].startAt)
     const timeSpent = range.diff( m(new Date()),  'hours')
     User.findOneAndUpdate({ telegram_id: `${msg.from.id}` },
-  { day_total: Math.abs(timeSpent) }).exec(() => {
-    User.aggregate([{
-      dates: [
-        { $month: { month_num: new Date() },
-        $week: { week_num: new Date() },
-      }],
-  }])
-  })
+  { day_total: Math.abs(timeSpent) }).exec()
   }
 })
 
