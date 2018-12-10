@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const DB_URI: string = 'mongodb+srv://master_:benis30@checkinbotcluster0-6xftm.azure.mongodb.net/test?retryWrites=true'
+const DB_URI: string = 'mongodb+srv://master_:dtTlk8OCkAAK79Gy@cluster0-wfcpc.gcp.mongodb.net/test?retryWrites=true'
 
 mongoose.connect(`${DB_URI}`)
 
