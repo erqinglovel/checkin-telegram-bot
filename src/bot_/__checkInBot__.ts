@@ -103,11 +103,19 @@ bot.onText(/\/today/, (msg: TelegramBot.Message) => {
 bot.onText(/\/week/, (msg: TelegramBot.Message) => {
   if (msg) {
 
-    User.findOne({ telegram_id: msg.from.id }, (err, doc) => {
+    User.findOne({ telegram_id: msg.from.id }, (err, doc: IUser) => {
       if (err) {
         console.error(err)
       } else {
-        bot.sendMessage(msg.from.id, `@${msg.from.username} time spent .::WEEK::. ${}`)
+        let weekHours: number
+        let date: any
+
+        for (date of doc.dates) {
+          if (date.week_num === parseInt(m().format('ww'), 0)) {
+            weekHours = date.week_total
+            bot.sendMessage(msg.from.id, `@${msg.from.username} time spent .::WEEK::. ${weekHours}`)
+          }
+        }
       }
     })
   }
