@@ -44,8 +44,8 @@ bot.onText(/\/start/, (msg: TelegramBot.Message) => {
 bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
   if (msg) {
     bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).format('HH:mm')}`)
-    User.findOneAndUpdate({ $or: [{'telegram_id': msg.from.id, 'dates.week_num': m().format('ww')},
-     {telegram_id: msg.from.id}]}, { $addToSet: { dates: {
+    User.findOneAndUpdate({ 'telegram_id': msg.from.id, 'dates.month_num': {$nin: [m().format('MM')]}},
+     { $addToSet: { dates: {
     month_num: m().format('MM'),
     month_total: 0,
     week_num: m().format('ww'),
@@ -102,7 +102,14 @@ bot.onText(/\/today/, (msg: TelegramBot.Message) => {
 
 bot.onText(/\/week/, (msg: TelegramBot.Message) => {
   if (msg) {
-    bot.sendMessage(msg.from.id, `@${msg.from.username} time spent .::WEEK::. ${m(new Date()).format('HH:mm')}`)
+
+    User.findOne({ telegram_id: msg.from.id }, (err, doc) => {
+      if (err) {
+        console.error(err)
+      } else {
+        bot.sendMessage(msg.from.id, `@${msg.from.username} time spent .::WEEK::. ${}`)
+      }
+    })
   }
    /* get from  db duration */
 })
