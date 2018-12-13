@@ -44,8 +44,10 @@ bot.onText(/\/start/, (msg: TelegramBot.Message) => {
 bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
   if (msg) {
     bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).format('HH:mm')}`)
-    User.findOneAndUpdate({ 'telegram_id': msg.from.id, 'dates.month_num': {$nin: [m().format('MM')]}},
-     { $addToSet: { dates: {
+    User.findOneAndUpdate({ 'telegram_id': msg.from.id,
+    'date.week_num': {$nin: [[m().format('ww')]]}},
+    // 'dates.month_num': {$nin: [m().format('MM')]},
+    { $addToSet: { dates: {
     month_num: m().format('MM'),
     month_total: 0,
     week_num: m().format('ww'),
@@ -68,13 +70,13 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
       } else {
 
         const range = m(doc.working_start)
-        const timeSpent = range.diff( m(new Date()),  'seconds')
+        const timeSpent = range.diff( m(new Date()),  'minutes')
         User.update({ telegram_id: `${msg.from.id}` }, {
            day_total: Math.abs(timeSpent),
            status: workerState[1],
 
         }).exec()
-        User.update({ 'dates.week_num': m().format('ww') }, {
+        User.update({ 'dates.week_num': m().format('format') }, {
           $inc: {'dates.$.week_total' : Math.abs(timeSpent), 'dates.$.month_total' : Math.abs(timeSpent) },
 
        }).exec()
@@ -124,7 +126,21 @@ bot.onText(/\/week/, (msg: TelegramBot.Message) => {
 
 bot.onText(/\/month/, (msg: TelegramBot.Message) => {
   if (msg) {
-    bot.sendMessage(msg.from.id, `@${msg.from.username} time spent .::MONTH::. ${m(new Date()).format('HH:mm')}`)
+    User.findOne({ telegram_id: msg.from.id }, (err, doc: IUser) => {
+      if (err) {
+        console.error(err)
+      } else {
+        let monthHours: number
+        let date: any
+
+        for (date of doc.dates) {
+          if (date.month_num === parseInt(m().format('MM'), 0)) {
+            monthHours = date.month_total
+            bot.sendMessage(msg.from.id, `@${msg.from.username} time spent .::MONTH::. ${monthHours}`)
+          }
+        }
+      }
+    })
   }
   /* get from  db duration */
 })
