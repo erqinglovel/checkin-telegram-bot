@@ -9,11 +9,7 @@ const token = process.env.TG_TOKEN || '716071100:AAHUl79kfpuGGniwfKmi_dJ0qr0mW9T
 const m = moment
 const bot = new TelegramBot(token, { polling: true})
 const workerState = ['checkin', 'checkout', 'pending']
-// const notes: INote[] = []
 
-// function getFromDb() {
-
-  // }
 bot.onText(/\/test (.+)/, (msg: TelegramBot.Message, match: RegExpExecArray) => {
       if (msg && match) {
         bot.sendMessage(msg.chat.id, `User @${msg.from.username} said ${match[1]}. There is parasites inside your guts`)
@@ -44,8 +40,7 @@ bot.onText(/\/start/, (msg: TelegramBot.Message) => {
 bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
   if (msg) {
     bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).format('HH:mm')}`)
-    User.findOneAndUpdate({ 'telegram_id': msg.from.id,
-    'date.week_num': {$nin: [[m().format('ww')]]}},
+    User.findOneAndUpdate({ 'telegram_id': msg.from.id, 'dates.week_num': {$nin: [m().format('ww')]}},
     // 'dates.month_num': {$nin: [m().format('MM')]},
     { $addToSet: { dates: {
     month_num: m().format('MM'),
@@ -61,6 +56,7 @@ bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
 
 bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
   if (msg) {
+    /* TODO: sendMessage in success callback */
     bot.sendMessage(msg.from.id, `@${msg.from.username} checkout at ${m(new Date()).format('HH:mm')}`)
     User.findOne({ telegram_id: `${msg.from.id}` }, (err, doc: IUser) => {
       if (err) {
@@ -76,10 +72,17 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
            status: workerState[1],
 
         }).exec()
-        User.update({ 'dates.week_num': m().format('format') }, {
-          $inc: {'dates.$.week_total' : Math.abs(timeSpent), 'dates.$.month_total' : Math.abs(timeSpent) },
-
-       }).exec()
+        User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
+        { $inc: {'dates.$.week_total' : Math.abs(timeSpent), 'dates.$.month_total' : {
+          $unwind: '$dates',
+          $group: {
+            _id: '$dates.month_num',
+            month_total: {
+              $sum: '$dates.week_total',
+            },
+          },
+        },
+        }}).exec()
       }
     },
   ).exec()
