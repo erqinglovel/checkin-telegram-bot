@@ -40,13 +40,15 @@ bot.onText(/\/start/, (msg: TelegramBot.Message) => {
 bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
   if (msg) {
     bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).format('HH:mm')}`)
-    User.findOneAndUpdate({ 'telegram_id': msg.from.id, 'dates.week_num': {$nin: [m().format('ww')]}},
+    User.findOneAndUpdate({ 'telegram_id': msg.from.id, 'dates.week_num': {$nin: [parseInt(m().format('ww'), 0)]}},
     // 'dates.month_num': {$nin: [m().format('MM')]},
-    { $addToSet: { dates: {
-    month_num: m().format('MM'),
-    month_total: 0,
-    week_num: m().format('ww'),
-    week_total: 0,
+    {
+      $addToSet: {
+        dates: {
+          month_num: parseInt(m().format('MM'), 0),
+          month_total: 0,
+          week_num: parseInt(m().format('ww'), 0),
+          week_total: 0,
    }},
    status: workerState[0],
    working_start: Date.now(),
@@ -64,37 +66,57 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
         console.error(new Error(err))
 
       } else {
-
+        let monthTotalHours
         const range = m(doc.working_start)
         const timeSpent = range.diff( m(new Date()),  'minutes')
         User.update({ telegram_id: `${msg.from.id}` }, {
            day_total: Math.abs(timeSpent),
            status: workerState[1],
+          }).exec()
 
-        }).exec()
         User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
-        { $inc: {'dates.$.week_total' : Math.abs(timeSpent), 'dates.$.month_total' : {
-          $unwind: '$dates',
-          $group: {
-            _id: '$dates.month_num',
-            month_total: {
-              $sum: '$dates.week_total',
-            },
-          },
-        },
-        }}).exec()
-      }
-    },
-  ).exec()
-  }
-})
+    { $inc: {'dates.$.week_total' : Math.abs(timeSpent)}}).exec()
+
+        User.aggregate([
+            [
+              {
+                $unwind: {
+                  path: '$dates',
+                  preserveNullAndEmptyArrays: false,
+                },
+              }, {
+                $group: {
+                  _id: '$dates.month_num',
+                  month_total: {
+                    $sum: '$dates.week_total',
+                  },
+                },
+              }, {
+                $project: {
+                  month_total: '$month_total',
+                  _id: false,
+                },
+              },
+            ],
+          ]).exec(async (error, res) => {
+            if (err) {
+              throw new Error(error)
+            } else {
+              return res
+            }
+          } )
+        }
+      },
+      ).exec()
+    }
+  })
 
 bot.onText(/\/today/, (msg: TelegramBot.Message) => {
-  if (msg) {
-    /* get from  db duration in hours-total for today*/
-   User.findOne({ telegram_id: msg.from.id }, (err, usr, doc) => {
-     if (err) {
-       console.error(new Error(err.toString()))
+    if (msg) {
+      /* get from  db duration in hours-total for today*/
+      User.findOne({ telegram_id: msg.from.id }, (err, usr, doc) => {
+        if (err) {
+          console.error(new Error(err.toString()))
      } else {
        console.info(doc)
        const user = {...usr._doc}
