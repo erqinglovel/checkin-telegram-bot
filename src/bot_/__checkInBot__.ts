@@ -66,7 +66,7 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
         console.error(new Error(err))
 
       } else {
-        let monthTotalHours
+
         const range = m(doc.working_start)
         const timeSpent = range.diff( m(new Date()),  'minutes')
         User.update({ telegram_id: `${msg.from.id}` }, {
@@ -98,11 +98,12 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
                 },
               },
             ],
-          ]).exec(async (error, res) => {
+          ]).exec((error, res) => {
             if (err) {
               throw new Error(error)
             } else {
-              return res
+              User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
+              { 'dates.$.month_total': res[0].month_total }).exec()
             }
           } )
         }
