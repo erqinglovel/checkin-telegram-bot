@@ -28,7 +28,10 @@ bot.onText(/\/start/, (msg: TelegramBot.Message) => {
       working_start: 0,
     }
 
-    bot.sendMessage(msg.from.id, 'YoLo, check in or die')
+    bot.sendMessage(msg.from.id,
+      `Yo, this is CheckInBot. Check in with \/checkin command. When you will finish your work, \'
+      just type \/checkout. Get total time for: \n
+      \/today \n \/week \n \/month`)
     User.create({ ...user }, (err) => {
       if (err) {
         throw new Error(err)
