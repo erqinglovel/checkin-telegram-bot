@@ -2,7 +2,6 @@ import http from 'http'
 import moment from 'moment'
 import TelegramBot from 'node-telegram-bot-api'
 import { User } from '../db/'
-// import { INote } from './interfaces/'
 import { IUser } from './interfaces/user.interface'
 
 const token = process.env.TG_TOKEN || '716071100:AAHUl79kfpuGGniwfKmi_dJ0qr0mW9TML-c'
@@ -61,8 +60,6 @@ bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
 
 bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
   if (msg) {
-    /* TODO: sendMessage in success callback */
-    bot.sendMessage(msg.from.id, `@${msg.from.username} checkout at ${m(new Date()).format('HH:mm')}`)
     User.findOne({ telegram_id: `${msg.from.id}` }, (err, doc: IUser) => {
       if (err) {
 
@@ -107,6 +104,7 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
             } else {
               User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
               { 'dates.$.month_total': res[0].month_total }).exec()
+              bot.sendMessage(msg.from.id, `@${msg.from.username} checkout at ${m(new Date()).format('HH:mm')}`)
             }
           } )
         }
