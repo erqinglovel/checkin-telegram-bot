@@ -1,7 +1,6 @@
 import http from 'http'
 import moment from 'moment'
 import TelegramBot from 'node-telegram-bot-api'
-import { timer } from 'rxjs'
 import { User } from '../db/'
 import { IUser } from './interfaces/user.interface'
 
