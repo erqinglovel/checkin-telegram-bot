@@ -28,7 +28,7 @@ bot.onText(/\/start/, (msg: TelegramBot.Message) => {
     }
 
     bot.sendMessage(msg.from.id,
-      `Yo, this is CheckInBot. Check in with \/checkin command. When you will finish your work, \'
+      `Yo, this is CheckInBot. Check in with \/checkin command. When you will finish your work, \
       just type \/checkout. Get total time for: \n
       \/today \n \/week \n \/month`)
     User.create({ ...user }, (err) => {
@@ -68,7 +68,7 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
       } else {
 
         const range = m(doc.working_start)
-        const timeSpent = range.diff( m(new Date()),  'minutes')
+        const timeSpent = range.diff( m(new Date()),  'hours')
         User.update({ telegram_id: `${msg.from.id}` }, {
            day_total: Math.abs(timeSpent),
            status: workerState[1],
