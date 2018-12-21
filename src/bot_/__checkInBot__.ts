@@ -4,6 +4,8 @@ import TelegramBot from 'node-telegram-bot-api'
 import { User } from '../db/'
 import { IUser } from './interfaces/user.interface'
 
+process.env.TG_TOKEN = '788852038:AAGbV2D2gokg5ZaucTZqBoZUAppwC2xdioo'
+
 const token = process.env.TG_TOKEN
 const m = moment
 const bot = new TelegramBot(token, { polling: true})
@@ -28,12 +30,13 @@ bot.onText(/\/start/, (msg: TelegramBot.Message) => {
     }
 
     bot.sendMessage(msg.from.id,
-      `Yo, this is CheckInBot. Check in with \/checkin command. When you will finish your work, \
-      just type \/checkout. Get total time for: \n
-      \/today \n \/week \n \/month`)
+      `Yo, this is CheckInBot. Check in with \/checkin command.
+When you will finish your work,just type \/checkout. Get total time for:
+      \n \/today \n \/week \n \/month`)
     User.create({ ...user }, (err) => {
       if (err) {
-        throw new Error(err)
+        console.error(err)
+        bot.sendMessage(msg.from.id, 'You already registred')
       }
     })
   }
@@ -41,9 +44,9 @@ bot.onText(/\/start/, (msg: TelegramBot.Message) => {
 
 bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
   if (msg) {
-    bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).format('HH:mm')}`)
-    User.findOneAndUpdate({ 'telegram_id': msg.from.id, 'dates.week_num': {$nin: [parseInt(m().format('ww'), 0)]}},
-    // 'dates.month_num': {$nin: [m().format('MM')]},
+    bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).utcOffset(120).format('HH:mm')}`)
+    User.findOneAndUpdate({ 'telegram_id': msg.from.id, 'dates.week_num': {$nin: [parseInt(m().format('ww'), 0)]},
+  'status': workerState[2]},
     {
       $addToSet: {
         dates: {
@@ -53,8 +56,12 @@ bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
           week_total: 0,
    }},
    status: workerState[0],
-   working_start: Date.now(),
-  }).exec()
+   working_start: m(Date.now()).utcOffset(120).valueOf(),
+  }).exec((err) => {
+    if (err) {
+      bot.sendMessage(msg.from.id, 'You already checkin\'d, lol')
+    }
+  })
     }
 })
 
@@ -104,7 +111,8 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
             } else {
               User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
               { 'dates.$.month_total': res[0].month_total }).exec()
-              bot.sendMessage(msg.from.id, `@${msg.from.username} checkout at ${m(new Date()).format('HH:mm')}`)
+              bot.sendMessage(msg.from.id, `@${msg.from.username} checkout at
+              ${m(new Date()).utcOffset(120).format('HH:mm')}`)
             }
           } )
         }
@@ -123,7 +131,8 @@ bot.onText(/\/today/, (msg: TelegramBot.Message) => {
        console.info(doc)
        const user = {...usr._doc}
        bot.sendMessage(msg.from.id,
-        `@${msg.from.username} time spent .::TODAY::. ${user.day_total}`)
+        `@${msg.from.username} time spent .::TODAY::. ${user.day_total}
+        Take a note, i'm responding only in hours`)
      }
    })
   }
