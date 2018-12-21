@@ -5,11 +5,7 @@
     "TG_TOKEN": "@tg-key"
   },
   "scale": {
-    "sfo1": {
-      "min": 1,
-      "max": 1
-    },
-    "bru1": {
+      "bru1": {
       "min": 1,
       "max": 1
     }
