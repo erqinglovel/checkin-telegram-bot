@@ -1,10 +1,11 @@
 import http from 'http'
 import moment from 'moment'
 import TelegramBot from 'node-telegram-bot-api'
+import { timer } from 'rxjs'
 import { User } from '../db/'
 import { IUser } from './interfaces/user.interface'
 
-const token = process.env.TG_TOKEN || '716071100:AAHUl79kfpuGGniwfKmi_dJ0qr0mW9TML-c'
+const token = process.env.TG_TOKEN
 const m = moment
 const bot = new TelegramBot(token, { polling: true})
 const workerState = ['checkin', 'checkout', 'pending']
@@ -153,6 +154,7 @@ bot.onText(/\/week/, (msg: TelegramBot.Message) => {
 
 bot.onText(/\/month/, (msg: TelegramBot.Message) => {
   if (msg) {
+    /* get from  db duration */
     User.findOne({ telegram_id: msg.from.id }, (err, doc: IUser) => {
       if (err) {
         console.error(err)
@@ -169,7 +171,6 @@ bot.onText(/\/month/, (msg: TelegramBot.Message) => {
       }
     })
   }
-  /* get from  db duration */
 })
 
 http.createServer((req, res) => {

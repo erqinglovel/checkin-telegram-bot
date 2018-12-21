@@ -7,7 +7,7 @@
     "postinstall": "npm run compile",
     "start": "node ./dist/index.js",
     "start:watch": "nodemon ./dist/index.js",
-    "dev": "npm run compile:watch | npm run start:watch TG_TOKEN=716071100:AAHUl79kfpuGGniwfKmi_dJ0qr0mW9TML-c",
+    "dev": " 'process.env.TG_TOKEN=788852038:AAGbV2D2gokg5ZaucTZqBoZUAppwC2xdioo' npm run compile:watch | npm run start:watch",
     "compile": "tsc",
     "compile:watch": "npm run compile -- -w",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
