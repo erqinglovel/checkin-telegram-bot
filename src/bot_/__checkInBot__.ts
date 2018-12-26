@@ -44,7 +44,6 @@ When you will finish your work,just type \/checkout. Get total time for:
 
 bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
   if (msg) {
-    bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).utcOffset(120).format('HH:mm')}`)
     User.findOneAndUpdate({ 'telegram_id': msg.from.id, 'dates.week_num': {$nin: [parseInt(m().format('ww'), 0)]},
   'status': workerState[2]},
     {
@@ -60,6 +59,8 @@ bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
   }).exec((err) => {
     if (err) {
       bot.sendMessage(msg.from.id, 'You already checkin\'d, lol')
+    } else {
+      bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).utcOffset(120).format('HH:mm')}`)
     }
   })
     }
@@ -78,7 +79,7 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
         const timeSpent = range.diff( m(new Date()),  'hours')
         User.update({ telegram_id: `${msg.from.id}` }, {
            day_total: Math.abs(timeSpent),
-           status: workerState[1],
+           status: workerState[2],
           }).exec()
 
         User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
