@@ -33,9 +33,9 @@ bot.onText(/\/start/, (msg: TelegramBot.Message) => {
       `Yo, this is CheckInBot. Check in with \/checkin command.
 When you will finish your work,just type \/checkout. Get total time for:
       \n \/today \n \/week \n \/month`)
-    User.create({ ...user }, (err) => {
-      if (err) {
-        console.error(err)
+    User.create({ ...user }, (error: object) => {
+      if (error) {
+        console.error(error)
         bot.sendMessage(msg.from.id, 'You already registred')
       }
     })
@@ -112,8 +112,8 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
             } else {
               User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
               { 'dates.$.month_total': res[0].month_total }).exec()
-              bot.sendMessage(msg.from.id, `@${msg.from.username} checkout at
-              ${m(new Date()).utcOffset(120).format('HH:mm')}`)
+              bot.sendMessage(msg.from.id,
+                `@${msg.from.username} checkout at ${m(new Date()).utcOffset(120).format('HH:mm')}`)
             }
           } )
         }
