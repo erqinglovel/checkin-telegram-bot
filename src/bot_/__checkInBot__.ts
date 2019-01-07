@@ -58,7 +58,7 @@ bot.onText(/\/checkin/, (msg: TelegramBot.Message) => {
    working_start: m(Date.now()).utcOffset(120).valueOf(),
   }).exec((err) => {
     if (err) {
-      bot.sendMessage(msg.from.id, 'You already checkin\'d, lol')
+      bot.sendMessage(msg.from.id, 'You already checkin\'d')
     } else {
       bot.sendMessage(msg.from.id, `@${msg.from.username} checkin at ${m(new Date()).utcOffset(120).format('HH:mm')}`)
     }
@@ -83,39 +83,39 @@ bot.onText(/\/checkout/, (msg: TelegramBot.Message) => {
           }).exec()
 
         User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
-    { $inc: {'dates.$.week_total' : Math.abs(timeSpent)}}).exec()
-
-        User.aggregate([
-            [
-              {
-                $unwind: {
-                  path: '$dates',
-                  preserveNullAndEmptyArrays: false,
-                },
-              }, {
-                $group: {
-                  _id: '$dates.month_num',
-                  month_total: {
-                    $sum: '$dates.week_total',
-                  },
-                },
-              }, {
-                $project: {
-                  month_total: '$month_total',
-                  _id: false,
-                },
+    { $inc: {'dates.$.week_total' : Math.abs(timeSpent)}}).exec(
+      User.aggregate([
+        [
+          {
+            $unwind: {
+              path: '$dates',
+              preserveNullAndEmptyArrays: false,
+            },
+          }, {
+            $group: {
+              _id: '$dates.month_num',
+              month_total: {
+                $sum: '$dates.week_total',
               },
-            ],
-          ]).exec((error, res) => {
-            if (err) {
-              throw new Error(error)
-            } else {
-              User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
-              { 'dates.$.month_total': res[0].month_total }).exec()
-              bot.sendMessage(msg.from.id,
-                `@${msg.from.username} checkout at ${m(new Date()).utcOffset(120).format('HH:mm')}`)
-            }
-          } )
+            },
+          }, {
+            $project: {
+              month_total: '$month_total',
+              _id: false,
+            },
+          },
+        ],
+      ]).exec((error, res) => {
+        if (err) {
+          bot.sendMessage('285942478', `Error occurred ${error}`)
+        } else {
+          User.update( {$and: [{'dates.week_num': m().format('ww')}, {'dates.month_num': m().format('MM')}]},
+          { 'dates.$.month_total': res[0].month_total }).exec()
+          bot.sendMessage(msg.from.id,
+            `@${msg.from.username} checkout at ${m(new Date()).utcOffset(120).format('HH:mm')}`)
+        }
+      } ),
+    )
         }
       },
       ).exec()
@@ -127,13 +127,14 @@ bot.onText(/\/today/, (msg: TelegramBot.Message) => {
       /* get from  db duration in hours-total for today*/
       User.findOne({ telegram_id: msg.from.id }, (err, usr, doc) => {
         if (err) {
-          console.error(new Error(err.toString()))
+          bot.sendMessage(msg.from.id,
+            `Something went wrong`)
+          console.error(err)
      } else {
        console.info(doc)
        const user = {...usr._doc}
        bot.sendMessage(msg.from.id,
-        `@${msg.from.username} time spent .::TODAY::. ${user.day_total}
-        Take a note, i'm responding only in hours`)
+        `@${msg.from.username} time spent .::TODAY::. ${user.day_total}h`)
      }
    })
   }
@@ -144,6 +145,8 @@ bot.onText(/\/week/, (msg: TelegramBot.Message) => {
 
     User.findOne({ telegram_id: msg.from.id }, (err, doc: IUser) => {
       if (err) {
+        bot.sendMessage(msg.from.id,
+          `Something went wrong`)
         console.error(err)
       } else {
         let weekHours: number
@@ -166,6 +169,8 @@ bot.onText(/\/month/, (msg: TelegramBot.Message) => {
     /* get from  db duration */
     User.findOne({ telegram_id: msg.from.id }, (err, doc: IUser) => {
       if (err) {
+        bot.sendMessage(msg.from.id,
+          `Something went wrong`)
         console.error(err)
       } else {
         let monthHours: number
